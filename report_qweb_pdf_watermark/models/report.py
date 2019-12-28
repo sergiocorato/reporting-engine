@@ -4,21 +4,22 @@
 from base64 import b64decode
 from logging import getLogger
 from PIL import Image
-from StringIO import StringIO
-from pyPdf import PdfFileWriter, PdfFileReader
-from pyPdf.utils import PdfReadError
-try:
-    from PyPDF2 import PdfFileWriter, PdfFileReader  # pylint: disable=W0404
-    from PyPDF2.utils import PdfReadError  # pylint: disable=W0404
-except ImportError:
-    pass
+from io import BytesIO
+
 try:
     # we need this to be sure PIL has loaded PDF support
     from PIL import PdfImagePlugin  # noqa: F401
 except ImportError:
     pass
 from openerp import api, models, tools
+
 logger = getLogger(__name__)
+
+try:
+    from PyPDF2 import PdfFileWriter, PdfFileReader  # pylint: disable=W0404
+    from PyPDF2.utils import PdfReadError  # pylint: disable=W0404
+except ImportError:
+    logger.debug('Can not import PyPDF2')
 
 
 class Report(models.Model):
@@ -53,12 +54,13 @@ class Report(models.Model):
         pdf = PdfFileWriter()
         pdf_watermark = None
         try:
-            pdf_watermark = PdfFileReader(StringIO(watermark))
+            pdf_watermark = PdfFileReader(BytesIO(watermark))
         except PdfReadError:
             # let's see if we can convert this with pillow
             try:
-                image = Image.open(StringIO(watermark))
-                pdf_buffer = StringIO()
+                Image.init()
+                image = Image.open(BytesIO(watermark))
+                pdf_buffer = BytesIO()
                 if image.mode != 'RGB':
                     image = image.convert('RGB')
                 resolution = image.info.get(
@@ -84,14 +86,14 @@ class Report(models.Model):
             logger.debug('Your watermark pdf contains more than one page, '
                          'all but the first one will be ignored')
 
-        for page in PdfFileReader(StringIO(result)).pages:
+        for page in PdfFileReader(BytesIO(result)).pages:
             watermark_page = pdf.addBlankPage(
                 page.mediaBox.getWidth(), page.mediaBox.getHeight()
             )
             watermark_page.mergePage(pdf_watermark.getPage(0))
             watermark_page.mergePage(page)
 
-        pdf_content = StringIO()
+        pdf_content = BytesIO()
         pdf.write(pdf_content)
 
         return pdf_content.getvalue()

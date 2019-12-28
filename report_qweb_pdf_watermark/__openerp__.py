@@ -14,6 +14,7 @@
     "data": [
         "demo/report.xml",
         "views/ir_actions_report_xml.xml",
+        "views/layout_templates.xml",
     ],
     "installable": True,
 }

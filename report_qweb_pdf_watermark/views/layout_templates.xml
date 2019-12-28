@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+    <!-- Include fix for https://github.com/odoo/odoo/issues/16610 -->
+    <template id="minimal_layout_pdf" inherit_id="report.minimal_layout">
+        <xpath expr="//head" position="inside">
+            <link href="/report_qweb_pdf_watermark/static/src/css/report_qweb_pdf_watermark.css"
+                  rel="stylesheet"/>
+        </xpath>
+    </template>
+    </data>
+</openerp>

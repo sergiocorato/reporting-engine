@@ -11,7 +11,7 @@
         />
         <record id="demo_report" model="ir.actions.report.xml">
             <field name="pdf_watermark_expression">docs[:1].company_id.logo</field>
-            <field name="paperformat" ref="report.paperformat_euro"/>
+            <field name="paperformat_id" ref="report.paperformat_euro"/>
         </record>
         <template id="demo_report_view">
             <t t-call="report.html_container">
